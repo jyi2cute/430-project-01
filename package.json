@@ -1,0 +1,27 @@
+{
+  "name": "430-project-01",
+  "version": "1.0.0",
+  "description": "Project 01 Milestone + Final",
+  "homepage": "https://github.com/jyi2cute/430-project-01#readme",
+  "bugs": {
+    "url": "https://github.com/jyi2cute/430-project-01/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jyi2cute/430-project-01.git"
+  },
+  "license": "UNLICENSED",
+  "author": "Jin Yi",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslinit ./src --fix",
+    "test": "echo \"No Tests\""
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.32.0"
+  }
+}
