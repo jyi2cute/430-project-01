@@ -16,7 +16,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./src/server.js",
-    "pretest": "eslinit ./src --fix",
+    "pretest": "eslint ./src --fix",
     "test": "echo \"No Tests\""
   },
   "devDependencies": {
