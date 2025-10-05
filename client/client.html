@@ -11,6 +11,57 @@
     </script>
 </head>
 <body>
+    <div class="container">
+        <h1>Book API</h1>
+
+        <section id="top">
+            <h3 style="margin-top: 0,">GET / HEAD Request</h3>
+            <form id="getForm">
+                <label for="urlField">Endpoint: </label>
+                <select id="'urlField" name="urlField">
+                    <option value="/api/books">/api/books (All books)</option>
+                    <option value="/api/booksByTitle">/api/booksByTitle</option>
+                    <option value="/api/genres">/api/genres</option>
+                    <option value="/api/stats">/api/stats</option>
+                    <option value="/api/authors">/api/authors</option>
+                    <option value="/notReal">/notReal (404)</option>
+                </select>
+
+                <label for="methodSelect">Method: </label>
+                <select id="methodSelect" name="methodSelect">
+                    <option value="GET">GET</option>
+                    <option value="HEAD">HEAD</option>
+                </select>
+                <input type="submit" value="Send Request" />
+            </form>
+
+            <h3 style="margin-top: 15px;">POST /api/books (Add Book)</h3>
+            <form id="post">
+                <label for="postTitle">Title: </label>
+                <input id="postTitle" type="text" name="Title" placeHolder="Title (Requried)" required />
+
+                <label for="postAuthor">Author: </label>
+                <input id="postAuthor" type="text" name="author" placedHolder="Author (Required)" required />
+
+                <label for="postGenres">Genres: </label>
+                <input id="postGenres" type="text" name="genres" placedHolder="Sci-Fi, Fiction (Required)" required />
+
+                <label for="postYear">Year: </label>
+                <input id="postYear" type="number" name="year" placedHolder="Year (Required)" required min="1000" max="2025" step="1" />
+
+                <input type="submit" value="Add Book" />
+            </form>
+        </section>
+
+        <section id="content">
+            <h3>API Response Details</h3>
+            <p>Status: <strong id="responseStatus">Awaiting request...</strong></p>
+            <p>Headers: </p>
+            <pre id="responseHeaders" style="font-size: 0.8em; color: #888;">(Headers appear here)</pre>
+            <p>Body: </p>
+            <pre id="response-log">(Body appears here)</pre>
+        </section>
+    </div>
     
 </body>
 </html>

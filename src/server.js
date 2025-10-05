@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const http = require('http');
 const query = require('querystring');
 
@@ -5,6 +7,14 @@ const htmlHandler = require('./htmlResponses.js');
 const jsonHandler = require('./jsonResponses.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
+
+try {
+  const booksData = JSON.parse(fs.readFileSync('./src/books.json', 'utf8'));
+
+  jsonHandler.loadData(booksData);
+} catch (e) {
+  jsonHandler.loadData({ books: [] });
+}
 
 const parseBody = (request, response, handler) => {
   const body = [];
