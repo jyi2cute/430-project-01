@@ -53,6 +53,9 @@
             } catch (e) {
                 logElement.textContent = bodyText;
             } 
+
+        // Resource Refrences: https://www.geeksforgeeks.org/javascript/how-to-delay-a-loop-in-javascript-using-async-await-with-promise/,
+        // https://v-checha.medium.com/advanced-node-js-patterns-implementing-robust-retry-logic-656cf70f8ee9  
         } catch (error) {
             if (attempt < maxRetries) {
                 const delay = Math.pow(2, attempt) * 1000;
