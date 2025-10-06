@@ -7,7 +7,102 @@
     <link rel="stylesheet" type="text/css" href="/style.css">
     
     <script>
+        window.onload = function() {
+        const rootUrl = '';
+        const statusElement = document.getElementById('responseStatus');
+        const headersElement = document.getElementById('responseHeaders');
+        const logElement = document.getElementById('response-log');
 
+        const sendRequest = async (url, method, body = null, attempt = 0) => {
+            statusElement.textContent = `Sending ${method} request...`;
+            headersElement.textContent = '';
+            logElement.textContent = 'Loading...';
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        try {
+            const fetchOptions = {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : undefined,
+            };
+
+            const response = await fetch(url, fetchOptions);
+
+            const responseHeaders = {};
+            response.headers.forEach((value, key) => {
+                responseHeaders[key] = value;
+            });
+            headersElement.textContent = JSON.stringify(responseHeaders, null, 2);
+
+            statusElement.textContent = `${response.status} ${response.statusText}`;
+            statusElement.style.color = (response.status >= 400) ? 'red' : 'green';
+
+            if (method === 'HEAD' || response.status === 204) {
+                logElement.textContent = '(Success, No content in body)';
+                return;
+            }
+
+            const bodyText = await response.text();
+
+            try {
+                const json = JSON.parse(bodyText);
+                logElement.textContent = JSON.stringify(json, null, 2);
+            } catch (e) {
+                logElement.textContent = bodyText;
+            } 
+        } catch (error) {
+            if (attempt < maxRetries) {
+                const delay = Math.pow(2, attempt) * 1000;
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return sendRequest(url, method, body, attempt + 1);
+            }
+
+            statusElement.textContent = `Network Error: Failed after ${maxRetries} attempts.`;
+            statusElement.style.color = 'red';
+            logElement.textContent = `Error: ${error.message}`;
+          }
+        };
+
+        const maxRetries = 3;
+
+        const urlFieldElement = document.getElementById('urlField');
+        const methodSelectElement = document.getElementById('methodSelect');
+
+        document.getElementById('getForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const path = urlFieldElement.value;
+            const method = methodSelectElement.value;
+
+            sendRequest(`${rootUrl}${path}`, method);
+        });
+
+        document.getElementById('post').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('postTitle').value;
+            const author = document.getElementById('postAuthor').value;
+            const genres = document.getElementById('postGenres').value.split(',').map(g => g.trim()).filter(g => g.length > 0);
+            const year = document.getElementById('postYear').value;
+
+            if (!title || !author || !genres.length || !year) {
+                statusElement.textContent = 'Error: Please fill out all required fields.';
+                statusElement.style.color = 'red';
+                return
+            }
+
+            const bookData = {
+                title,
+                author, 
+                genres,
+                year: parseInt(year, 10),
+            };
+
+            sendRequest(`${rootUrl}/api/books`, 'POST', bookData);
+        });
+    };
     </script>
 </head>
 <body>
@@ -18,14 +113,15 @@
             <h3 style="margin-top: 0,">GET / HEAD Request</h3>
             <form id="getForm">
                 <label for="urlField">Endpoint: </label>
-                <select id="'urlField" name="urlField">
+                <input id="urlField" type="text" name="urlField" list="endPoint" value="/api/books"/>
+                <datalist id="endPoint">
                     <option value="/api/books">/api/books (All books)</option>
                     <option value="/api/booksByTitle">/api/booksByTitle</option>
                     <option value="/api/genres">/api/genres</option>
                     <option value="/api/stats">/api/stats</option>
                     <option value="/api/authors">/api/authors</option>
                     <option value="/notReal">/notReal (404)</option>
-                </select>
+                </datalist>
 
                 <label for="methodSelect">Method: </label>
                 <select id="methodSelect" name="methodSelect">

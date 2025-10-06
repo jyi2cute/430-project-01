@@ -3,6 +3,7 @@ const fs = require('fs');
 let index;
 let css;
 
+// importing client and style
 try {
   index = fs.readFileSync(`${__dirname}/../client/client.html`);
   css = fs.readFileSync(`${__dirname}/../client/style.css`);
@@ -24,6 +25,7 @@ const respondStatic = (request, response, status, content, contentType) => {
   response.end();
 };
 
+// functions for index, CSS, and 404 error
 const getIndex = (request, response) => {
   respondStatic(request, response, 200, index, 'text/html');
 };
@@ -33,10 +35,11 @@ const getCSS = (request, response) => {
 };
 
 const get404 = (request, response) => {
-  const errorMsg = 'Not FoundL The requested endpoint does not exist.';
+  const errorMsg = 'Not Found: The requested endpoint does not exist.';
   respondStatic(request, response, 404, errorMsg, 'text/html');
 };
 
+// function handles for other file types (non-HTML or non-CSS)
 const getStaticFile = (request, response, pathname) => {
   const filePath = `${__dirname}/../client${pathname.substring(1)}`;
 

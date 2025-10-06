@@ -1,6 +1,7 @@
 const fs = require('fs');
 
 const http = require('http');
+const { URL } = require('url');
 const query = require('querystring');
 
 const htmlHandler = require('./htmlResponses.js');
@@ -8,6 +9,7 @@ const jsonHandler = require('./jsonResponses.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
+//importing books.json data
 try {
   const booksData = JSON.parse(fs.readFileSync('./src/books.json', 'utf8'));
 
@@ -16,13 +18,13 @@ try {
   jsonHandler.loadData({ books: [] });
 }
 
+//function to parse the body
 const parseBody = (request, response, handler) => {
   const body = [];
 
   request.on('error', (err) => {
     console.dir(err);
-    response.statusCode = 400;
-    response.end();
+    jsonHandler.respondJSON(request, response, 400, { message: 'Request data error.' });
   });
 
   request.on('data', (chunk) => {
@@ -30,30 +32,47 @@ const parseBody = (request, response, handler) => {
   });
 
   request.on('end', () => {
+    const contentType = request.headers['content-type'];
     const bodyString = Buffer.concat(body).toString();
-    request.body = query.parse(bodyString);
 
-    handler(request, response);
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        request.body = JSON.parse(bodyString);
+      } catch (e) {
+        console.error('JSON parsing error', e.message);
+        return jsonHandler.respondJSON(request, response, 400, { message: 'Malformed JSON in request.' });
+      }
+    } else if (contentType && contentType.includes('x-www-form-urlencoded')) {
+      request.body = query.parse(bodyString);
+    } else {
+      request.body = {};
+    }
+
+    return handler(request, response);
   });
 };
 
+//function for handling Post method
 const handlePost = (request, response, parsedUrl) => {
   const { pathname } = parsedUrl;
   if (pathname === '/api/books') {
     return parseBody(request, response, jsonHandler.addBook);
   }
 
-  if (pathname.startsWith('/api/books')) {
-    const title = pathname.split('/')[3];
+  if (pathname.startsWith('/api/books/')) {
+    const parts = pathname.split('/');
+    const title = parts[3];
     if (title) {
       request.params = { title };
       return parseBody(request, response, jsonHandler.editBook);
     }
+    return htmlHandler.get404(request, response);
   }
 
   return htmlHandler.get404(request, response);
 };
 
+//function for handling get method
 const handleGet = (request, response, parsedUrl) => {
   const { pathname, searchParams } = parsedUrl;
 
@@ -69,10 +88,33 @@ const handleGet = (request, response, parsedUrl) => {
     return htmlHandler.getIndex(request, response);
   }
 
-  if (pathname.startsWith('/api/books/')) {
-    const title = pathname.split('/')[3];
+  if (pathname.includes('.') && pathname !== '/favicon.ico') {
+    return htmlHandler.getStaticFile(request, response, pathname);
+  }
+
+  if (pathname === '/api/booksByTitle' || pathname === '/api/booksByTitle') {
+    return jsonHandler.getBooks(request, response, params);
+  }
+
+  if (pathname.startsWith('/api/booksByTitle')) {
+    const parts = pathname.split('/');
+    const title = parts[parts.length - 1];
+
     if (title) {
-      request.params = { title };
+      request.params = { title: decodeURIComponent(title) };
+      return jsonHandler.getBookByTitle(request, response, params);
+    }
+  }
+
+  if (pathname === '/api/books') {
+    return jsonHandler.getBooks(request, response, params);
+  }
+
+  if (pathname.startsWith('/api/books/')) {
+    const parts = pathname.split('/');
+    if (parts.length > 3 && parts[2] === 'books') {
+      const title = parts[3];
+      request.params = { title: decodeURIComponent(title) };
       return jsonHandler.getBookByTitle(request, response, params);
     }
   }
@@ -92,6 +134,7 @@ const handleGet = (request, response, parsedUrl) => {
   return htmlHandler.get404(request, response);
 };
 
+//function for onRequest
 const onRequest = (request, response) => {
   const protocol = request.connection.encrypted ? 'https' : 'http';
   const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);
