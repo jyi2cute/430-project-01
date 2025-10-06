@@ -9,7 +9,7 @@ const jsonHandler = require('./jsonResponses.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
-//importing books.json data
+// importing books.json data
 try {
   const booksData = JSON.parse(fs.readFileSync('./src/books.json', 'utf8'));
 
@@ -18,7 +18,7 @@ try {
   jsonHandler.loadData({ books: [] });
 }
 
-//function to parse the body
+// function to parse the body
 const parseBody = (request, response, handler) => {
   const body = [];
 
@@ -52,7 +52,7 @@ const parseBody = (request, response, handler) => {
   });
 };
 
-//function for handling Post method
+// function for handling Post method
 const handlePost = (request, response, parsedUrl) => {
   const { pathname } = parsedUrl;
   if (pathname === '/api/books') {
@@ -72,7 +72,7 @@ const handlePost = (request, response, parsedUrl) => {
   return htmlHandler.get404(request, response);
 };
 
-//function for handling get method
+// function for handling get method
 const handleGet = (request, response, parsedUrl) => {
   const { pathname, searchParams } = parsedUrl;
 
@@ -86,10 +86,6 @@ const handleGet = (request, response, parsedUrl) => {
   }
   if (pathname === '/') {
     return htmlHandler.getIndex(request, response);
-  }
-
-  if (pathname.includes('.') && pathname !== '/favicon.ico') {
-    return htmlHandler.getStaticFile(request, response, pathname);
   }
 
   if (pathname === '/api/booksByTitle' || pathname === '/api/booksByTitle') {
@@ -134,7 +130,7 @@ const handleGet = (request, response, parsedUrl) => {
   return htmlHandler.get404(request, response);
 };
 
-//function for onRequest
+// function for onRequest
 const onRequest = (request, response) => {
   const protocol = request.connection.encrypted ? 'https' : 'http';
   const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);

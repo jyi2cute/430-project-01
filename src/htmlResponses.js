@@ -3,7 +3,7 @@ const fs = require('fs');
 let index;
 let css;
 
-//importing client and style
+// importing client and style
 try {
   index = fs.readFileSync(`${__dirname}/../client/client.html`);
   css = fs.readFileSync(`${__dirname}/../client/style.css`);

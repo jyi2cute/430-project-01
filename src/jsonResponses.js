@@ -3,7 +3,7 @@ const data = {
   booksMap: new Map(),
 };
 
-//Resource referenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
+// Resource referenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
 const normalizeTitle = (title) => {
   if (!title) return '';
   return title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
@@ -42,7 +42,7 @@ const respondNoContent = (request, response) => {
   response.end();
 };
 
-//Resource Refreneced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+// Resource Refreneced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 
 // API endpoints and posts
 const getBooks = (request, response, params) => {
@@ -168,7 +168,7 @@ const editBook = (request, response) => {
 
   let updated = false;
 
-  //Resource Refrenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
+  // Resource Refrenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
   if (body.author) { bookToEdit.author = body.author; updated = true; }
   if (body.country) { bookToEdit.country = body.country; updated = true; }
   if (body.language) { bookToEdit.language = body.language; updated = true; }
