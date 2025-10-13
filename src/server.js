@@ -18,13 +18,12 @@ try {
   jsonHandler.loadData({ books: [] });
 }
 
-// function to parse the body
-const parseBody = (request, response, handler) => {
+// functions to parse the body
+const readStreamBody = (request) => new Promise((resolve, reject) => {
   const body = [];
 
   request.on('error', (err) => {
-    console.dir(err);
-    jsonHandler.respondJSON(request, response, 400, { message: 'Request data error.' });
+    reject(err);
   });
 
   request.on('data', (chunk) => {
@@ -32,24 +31,32 @@ const parseBody = (request, response, handler) => {
   });
 
   request.on('end', () => {
+    resolve(Buffer.concat(body).toString());
+  });
+});
+
+const parseBody = async (request, response, handler) => {
+  try {
+    const bodyString = await readStreamBody(request);
     const contentType = request.headers['content-type'];
-    const bodyString = Buffer.concat(body).toString();
 
     if (contentType && contentType.includes('application/json')) {
       try {
         request.body = JSON.parse(bodyString);
       } catch (e) {
         console.error('JSON parsing error', e.message);
-        return jsonHandler.respondJSON(request, response, 400, { message: 'Malformed JSON in request.' });
+        return jsonHandler.respondJSON(request, response, 400, { message: 'Malformed JSON in request,' });
       }
     } else if (contentType && contentType.includes('x-www-form-urlencoded')) {
       request.body = query.parse(bodyString);
     } else {
       request.body = {};
     }
-
     return handler(request, response);
-  });
+  } catch (err) {
+    console.dir(err);
+    return jsonHandler.respondJSON(request, response, 400, { message: 'Request data error.' });
+  }
 };
 
 // function for handling Post method
@@ -84,6 +91,11 @@ const handleGet = (request, response, parsedUrl) => {
   if (pathname.endsWith('.css')) {
     return htmlHandler.getCSS(request, response);
   }
+
+  if (pathname.endsWith('js') || pathname.endsWith('.png') || pathname.endsWith('.jpg') || pathname.endsWith('.txt')) {
+    return htmlHandler.getStaticFile(request, response, pathname);
+  }
+
   if (pathname === '/') {
     return htmlHandler.getIndex(request, response);
   }
