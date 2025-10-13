@@ -84,10 +84,7 @@ const handlePost = (request, response, parsedUrl) => {
 const handleGet = (request, response, parsedUrl) => {
   const { pathname, searchParams } = parsedUrl;
 
-  const params = Array.from(searchParams.entries()).reduce((acc, [key, value]) => {
-    acc[key] = value;
-    return acc;
-  }, {});
+  const params = Object.fromEntries(searchParams.entries());
 
   if (pathname.endsWith('.css')) {
     return htmlHandler.getCSS(request, response);
@@ -101,28 +98,15 @@ const handleGet = (request, response, parsedUrl) => {
     return htmlHandler.getIndex(request, response);
   }
 
-  if (pathname === '/api/booksByTitle' || pathname === '/api/booksByTitle') {
+  if (pathname === '/api/books' || pathname === '/api/booksByTitle') {
     return jsonHandler.getBooks(request, response, params);
   }
 
-  if (pathname.startsWith('/api/booksByTitle')) {
+  if (pathname.startsWith('/api/books') || pathname.startsWith('/api/booksByTitle')) {
     const parts = pathname.split('/');
     const title = parts[parts.length - 1];
 
-    if (title) {
-      request.params = { title: decodeURIComponent(title) };
-      return jsonHandler.getBookByTitle(request, response, params);
-    }
-  }
-
-  if (pathname === '/api/books') {
-    return jsonHandler.getBooks(request, response, params);
-  }
-
-  if (pathname.startsWith('/api/books/')) {
-    const parts = pathname.split('/');
-    if (parts.length > 3 && parts[2] === 'books') {
-      const title = parts[3];
+    if (title && title !== 'books' && title !== 'booksByTitle') {
       request.params = { title: decodeURIComponent(title) };
       return jsonHandler.getBookByTitle(request, response, params);
     }
