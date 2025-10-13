@@ -82,6 +82,48 @@
             sendRequest(`${rootUrl}${path}`, method);
         });
 
+        document.getElementById('editForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const originalTitle = document.getElementById('editOriginalTitle').value.trim();
+            if (!originalTitle) {
+                statusElemet.textContent = 'Error: Original Title is required to find the book.';
+                statusElement.style.color = 'red';
+                return;
+            }
+
+            const newTitle = document.getElementById('editNewTitle').value.trim();
+            const newAuthor = document.getElementById('editAuthor').value.trim();
+            const newYear = document.getElementById('editYear').value.trim();
+            const newGenres = document.getElementById('editGenres').value.trim();
+
+            const updateData = {};
+            if (newTitle) updateData.title = newTitle;
+            if (newAuthor) updateData.author = newAuthor;
+
+            if (newYear) {
+                const yearInt = parseInt(newYear, 10);
+                if (!isNaN(yearInt)) {
+                    updateData.year = yearInt;
+                }
+            }
+
+            if (newGenres) {
+                updateData.genres = newGenres.split(',').map(g => g.trim()).filter(g => g.length > 0);
+            }
+
+            if (Object.keys(updateData).length === 0) {
+                statusElement.textContent = 'Error: No new fields provided for update.';
+                statusElement.style.color = 'red';
+                return;
+            }
+
+            const encodedTitle = encodeURIComponent(originalTitle);
+            const url = `${rootUrl}/api/books/${encodedTitle}`;
+
+            sendRequest(url, 'POST', updateData);
+        });
+
         document.getElementById('post').addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -132,6 +174,26 @@
                     <option value="HEAD">HEAD</option>
                 </select>
                 <input type="submit" value="Send Request" />
+            </form>
+
+            <h2>Edit Book</h2>
+            <form id="editForm">
+                <label for="editOriginalTitle">Original Title (to find book):</label>
+                <input type="text" id="editOriginalTitle" required><br>
+
+                <label for="editNewTitle">New Title:</label>
+                <input type="text" id="editNewTitle"><br>
+
+                <label for="editAuthor">New Author:</label>
+                <input type="text" id="editAuthor"><br>
+
+                <label for="editYear">New Year:</label>
+                <input type="number" id="editYear"><br>
+
+                <label for="editGenres">New Genres:</label>
+                <input type="text" id="editGenres"><br>
+
+                <button type="submit">Edit Book:</button>
             </form>
 
             <h3 style="margin-top: 15px;">POST /api/books (Add Book)</h3>

@@ -68,8 +68,9 @@ const handlePost = (request, response, parsedUrl) => {
 
   if (pathname.startsWith('/api/books/')) {
     const parts = pathname.split('/');
-    const title = parts[3];
-    if (title) {
+    const encodedTitle = parts[3];
+    if (encodedTitle) {
+      const title = decodeURIComponent(encodedTitle);
       request.params = { title };
       return parseBody(request, response, jsonHandler.editBook);
     }

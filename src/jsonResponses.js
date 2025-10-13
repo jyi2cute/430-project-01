@@ -171,14 +171,9 @@ const editBook = (request, response) => {
   // Resource Refrenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
   if (body.author) { bookToEdit.author = body.author; updated = true; }
   if (body.country) { bookToEdit.country = body.country; updated = true; }
-  if (body.language) { bookToEdit.language = body.language; updated = true; }
-  if (body.pages && !Number.isNaN(parseInt(body.pages, 10))) {
-    bookToEdit.pages = parseInt(body.pages, 10); updated = true;
-  }
   if (body.year && !NaN(parseInt(body.year, 10))) {
     bookToEdit.year = parseInt(body.year, 10); updated = true;
   }
-  if (body.link) { bookToEdit.link = body.link; updated = true; }
   if (body.genres) {
     bookToEdit.genres = Array.isArray(body.genres) ? body.genres : [body.genres];
     updated = true;
