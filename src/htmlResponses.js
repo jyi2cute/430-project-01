@@ -41,13 +41,15 @@ const get404 = (request, response) => {
 
 // function handles for other file types (non-HTML or non-CSS)
 const getStaticFile = (request, response, pathname) => {
-  const filePath = `${__dirname}/../client${pathname.substring(1)}`;
+  const filePath = `${__dirname}/../client${pathname}`;
 
   try {
     const fileContent = fs.readFileSync(filePath);
 
     let contentType = 'application/octet-stream';
-    if (pathname.endsWith('.js')) {
+    if (pathname.endsWith('.html')) {
+      contentType = 'text/html';
+    } else if (pathname.endsWith('.js')) {
       contentType = 'text/javascript';
     } else if (pathname.endsWith('.png')) {
       contentType = 'image/png';

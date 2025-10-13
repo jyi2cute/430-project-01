@@ -90,6 +90,10 @@ const handleGet = (request, response, parsedUrl) => {
     return htmlHandler.getCSS(request, response);
   }
 
+  if (pathname === '/documentation.html') {
+    return htmlHandler.getStaticFile(request, response, pathname);
+  }
+
   if (pathname.endsWith('js') || pathname.endsWith('.png') || pathname.endsWith('.jpg') || pathname.endsWith('.txt')) {
     return htmlHandler.getStaticFile(request, response, pathname);
   }
