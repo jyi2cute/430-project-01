@@ -1,8 +1,8 @@
 const fs = require('fs');
-
+const path = require('path');
 const http = require('http');
 const { URL } = require('url');
-const query = require('querystring');
+// const query = require('querystring');
 
 const htmlHandler = require('./htmlResponses.js');
 const jsonHandler = require('./jsonResponses.js');
@@ -10,13 +10,22 @@ const jsonHandler = require('./jsonResponses.js');
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 // importing books.json data
-try {
-  const booksData = JSON.parse(fs.readFileSync('./src/books.json', 'utf8'));
+function loadBookData() {
+  let booksData = { books: [] };
+  try {
+    const filePath = path.join(__dirname, 'books.json');
+    const fileContent = fs.readFileSync(filePath, 'utf8');
 
-  jsonHandler.loadData(booksData);
-} catch (e) {
-  jsonHandler.loadData({ books: [] });
+    const booksDataArray = JSON.parse(fileContent);
+    booksData = { books: booksDataArray };
+  } catch (e) {
+    booksData = { books: [] };
+  }
+  return booksData;
 }
+
+const data = loadBookData();
+jsonHandler.loadData(data);
 
 // functions to parse the body
 const readStreamBody = (request) => new Promise((resolve, reject) => {
@@ -48,7 +57,8 @@ const parseBody = async (request, response, handler) => {
         return jsonHandler.respondJSON(request, response, 400, { message: 'Malformed JSON in request,' });
       }
     } else if (contentType && contentType.includes('x-www-form-urlencoded')) {
-      request.body = query.parse(bodyString);
+      const params = new URLSearchParams(bodyString);
+      request.body = Object.fromEntries(params.entries());
     } else {
       request.body = {};
     }
@@ -68,8 +78,8 @@ const handlePost = (request, response, parsedUrl) => {
 
   if (pathname.startsWith('/api/books/')) {
     const parts = pathname.split('/');
-    const encodedTitle = parts[3];
-    if (encodedTitle) {
+    const encodedTitle = parts[parts.length - 1];
+    if (encodedTitle && encodedTitle !== 'books') {
       const title = decodeURIComponent(encodedTitle);
       request.params = { title };
       return parseBody(request, response, jsonHandler.editBook);

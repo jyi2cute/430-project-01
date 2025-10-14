@@ -4,9 +4,11 @@ const data = {
 };
 
 // Resource referenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
-const normalizeTitle = (title) => {
-  if (!title) return '';
-  return title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+const normalizeSearch = (text) => {
+  if (!text) return '';
+  const cleanText = text.replace(/[\u200B=\uFEFF\u00A0\t\n\r]/g, '')
+    .replace(/[^\x20-\x7E]/g, '');
+  return cleanText.toLowerCase().trim();
 };
 
 // initialize data
@@ -17,7 +19,8 @@ const loadData = (initialData) => {
   }
 
   data.books.forEach((book) => {
-    const normalizedTitle = normalizeTitle(book.title);
+    const normalizedTitle = normalizeSearch(book.title);
+    console.log(`Loading Book Key: [${normalizedTitle.title}] | Length: ${normalizedTitle.length}`);
     data.booksMap.set(normalizedTitle, book);
   });
 };
@@ -49,14 +52,14 @@ const getBooks = (request, response, params) => {
   let booksToReturn = data.books;
 
   if (params.author) {
-    const queryAuthor = params.author.toLowerCase();
+    const queryAuthor = normalizeSearch(params.author);
     booksToReturn = booksToReturn.filter((b) => b.author.toLowerCase().includes(queryAuthor));
   }
 
   if (params.genre) {
-    const queryGenre = params.genre.toLowerCase();
+    const queryGenre = normalizeSearch(params.genre);
     booksToReturn = booksToReturn.filter((b) => b.genres
-    && b.genres.some((g) => g.toLowerCase().includes(queryGenre)));
+      && b.genres.some((g) => g.toLowerCase().includes(queryGenre)));
   }
 
   if (params.limit && !Number.isNaN(parseInt(params.limit, 10))) {
@@ -72,7 +75,7 @@ const getBooks = (request, response, params) => {
 
 const getBookByTitle = (request, response) => {
   const { title } = request.params;
-  const normalizedTitle = normalizeTitle(title);
+  const normalizedTitle = normalizeSearch(title);
   const book = data.booksMap.get(normalizedTitle);
 
   if (!book) {
@@ -111,58 +114,16 @@ const getStats = (request, response) => {
   return respondJSON(request, response, 200, stats);
 };
 
-// functions to add and edit book api
-const addBook = (request, response) => {
-  const { body } = request;
-  const requiredFields = ['title', 'author', 'genres', 'year'];
-
-  const includesAllFields = requiredFields.every((field) => body[field]);
-
-  if (!includesAllFields) {
-    return respondJSON(request, response, 400, {
-      message: `Missing required field: ${requiredFields.join(', ')}`,
-    });
-  }
-
-  const normalizedTitle = normalizeTitle(body.title);
-  if (data.booksMap.has(normalizedTitle)) {
-    return respondJSON(request, response, 409, {
-      message: `Book titled "${body.title}" already exists.`,
-    });
-  }
-
-  let bookGenres = [];
-  if (body.genres) {
-    bookGenres = Array.isArray(body.genres) ? body.genres : [body.genres];
-  }
-
-  const newBook = {
-    title: body.title,
-    author: body.author,
-    country: body.country || 'Unknown',
-    language: body.language || 'English',
-    pages: parseInt(body.pages, 10) || 0,
-    year: parseInt(body.year, 10) || 0,
-    genres: bookGenres,
-    link: body.link || '',
-  };
-
-  data.books.push(newBook);
-  data.booksMap.set(normalizedTitle, newBook);
-
-  return respondJSON(request, response, 201, { message: 'Book added successfully', book: newBook });
-};
-
+// function to edit book api
 const editBook = (request, response) => {
-  const { title } = request.params;
+  const { title: oldTitle } = request.params;
   const { body } = request;
-  const normalizedTitle = normalizeTitle(title);
-
-  const bookToEdit = data.booksMap.get(normalizedTitle);
+  const normalizedOldTitle = normalizeSearch(oldTitle);
+  const bookToEdit = data.booksMap.get(normalizedOldTitle);
 
   if (!bookToEdit) {
     return respondJSON(request, response, 404, {
-      message: `Book titled "${title}" not found for update.`,
+      message: `Book titled ${oldTitle} not found for update.`,
     });
   }
 
@@ -170,8 +131,8 @@ const editBook = (request, response) => {
 
   // Resource Refrenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
   if (body.author) { bookToEdit.author = body.author; updated = true; }
-  if (body.country) { bookToEdit.country = body.country; updated = true; }
-  if (body.year && !NaN(parseInt(body.year, 10))) {
+
+  if (body.year && !Number.isNaN(parseInt(body.year, 10))) {
     bookToEdit.year = parseInt(body.year, 10); updated = true;
   }
   if (body.genres) {
@@ -180,11 +141,17 @@ const editBook = (request, response) => {
   }
 
   if (body.title && body.title !== bookToEdit.title) {
-    const newNormalizedTitle = normalizeTitle(body.title);
+    const newTitle = body.title;
+    const normalizedNewTitle = normalizeSearch(newTitle);
+    if (data.booksMap.has(normalizedNewTitle)) {
+      return respondJSON(request, response, 409, {
+        message: `Book titled ${newTitle} already exists.`,
+      });
+    }
 
-    data.booksMap.delete(normalizedTitle);
-    bookToEdit.title = body.title;
-    data.booksMap.set(newNormalizedTitle, bookToEdit);
+    data.booksMap.delete(normalizedOldTitle);
+    bookToEdit.title = newTitle;
+    data.booksMap.set(normalizedNewTitle, bookToEdit);
 
     updated = true;
   }
@@ -197,9 +164,46 @@ const editBook = (request, response) => {
   }
 
   return respondJSON(request, response, 200, {
-    messsage: 'Book updated succesfully.',
+    message: 'Book updated successfully.',
     book: bookToEdit,
   });
+};
+
+// function to add book api
+const addBook = (request, response) => {
+  const { body } = request;
+  const requiredFields = ['title', 'author', 'genres', 'year'];
+  const normalizedNewTitle = normalizeSearch(body.title);
+  const includesAllFields = requiredFields.every((field) => body[field]);
+
+  if (!includesAllFields) {
+    return respondJSON(request, response, 400, {
+      message: `Missing required field: ${requiredFields.join(', ')}`,
+    });
+  }
+
+  if (data.booksMap.has(normalizedNewTitle)) {
+    return respondJSON(request, response, 409, {
+      message: `Book titled ${body.title} already exists.`,
+    });
+  }
+
+  let bookGenres = [];
+  if (body.genres) {
+    bookGenres = Array.isArray(body.genres) ? body.genres : [body.genres];
+  }
+
+  const newBook = {
+    title: body.title,
+    author: body.author,
+    year: parseInt(body.year, 10) || 0,
+    genres: bookGenres,
+  };
+
+  data.books.push(newBook);
+  data.booksMap.set(normalizedNewTitle, newBook);
+
+  return respondJSON(request, response, 201, { message: 'Book added successfully', book: newBook });
 };
 
 module.exports = {

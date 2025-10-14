@@ -87,7 +87,7 @@
 
             const originalTitle = document.getElementById('editOriginalTitle').value.trim();
             if (!originalTitle) {
-                statusElemet.textContent = 'Error: Original Title is required to find the book.';
+                statusElement.textContent = 'Error: Original Title is required to find the book.';
                 statusElement.style.color = 'red';
                 return;
             }
@@ -195,7 +195,7 @@
                 <label for="editGenres">New Genres:</label>
                 <input type="text" id="editGenres"><br>
 
-                <button type="submit">Edit Book:</button>
+                <input type="submit" value="Edit Book" />
             </form>
 
             <h3 style="margin-top: 15px;">POST /api/books (Add Book)</h3>
