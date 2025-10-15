@@ -3,12 +3,10 @@ const data = {
   booksMap: new Map(),
 };
 
-// Resource referenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions
+// Resource referenced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions, https://www.w3schools.com/jsref/jsref_regexp_whitespace.asp
 const normalizeSearch = (text) => {
   if (!text) return '';
-  const cleanText = text.replace(/[\u200B=\uFEFF\u00A0\t\n\r]/g, '')
-    .replace(/[^\x20-\x7E]/g, '');
-  return cleanText.toLowerCase().trim();
+  return text.replace(/\s+/g, '').toLowerCase().trim();
 };
 
 // initialize data
@@ -20,7 +18,7 @@ const loadData = (initialData) => {
 
   data.books.forEach((book) => {
     const normalizedTitle = normalizeSearch(book.title);
-    console.log(`Loading Book Key: [${normalizedTitle.title}] | Length: ${normalizedTitle.length}`);
+    console.log(`Loading Book Key: [${normalizedTitle}] | Length: ${normalizedTitle.length}`);
     data.booksMap.set(normalizedTitle, book);
   });
 };
@@ -197,10 +195,16 @@ const addBook = (request, response) => {
     bookGenres = Array.isArray(body.genres) ? body.genres : [body.genres];
   }
 
+  const year = parseInt(body.year, 10);
+  if (Number.isNaN(year) || year < 0) {
+    return respondJSON(request, response, 400, {
+      message: 'The year field is required and must be a postive int.',
+    });
+  }
   const newBook = {
     title: body.title,
     author: body.author,
-    year: parseInt(body.year, 10) || 0,
+    year,
     genres: bookGenres,
   };
 
