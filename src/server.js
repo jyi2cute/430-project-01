@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { URL } = require('url');
-// const query = require('querystring');
 
 const htmlHandler = require('./htmlResponses.js');
 const jsonHandler = require('./jsonResponses.js');

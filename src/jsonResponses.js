@@ -47,7 +47,7 @@ const respondNoContent = (request, response) => {
 
 // Resource Refreneced: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-// API endpoints and posts
+// 4 GET API endpoints
 const getBooks = (request, response, params) => {
   let booksToReturn = data.books;
 
@@ -113,6 +113,10 @@ const getStats = (request, response) => {
 
   return respondJSON(request, response, 200, stats);
 };
+
+/*
+* Post Methods: Edit book and Add book
+*/
 
 // function to edit book api
 const editBook = (request, response) => {

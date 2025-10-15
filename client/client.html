@@ -1,230 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Books API</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" type="text/css" href="/style.css">
-    
+
     <script>
-        window.onload = function() {
-        const rootUrl = '';
-        const statusElement = document.getElementById('responseStatus');
-        const headersElement = document.getElementById('responseHeaders');
-        const logElement = document.getElementById('response-log');
+        window.onload = function () {
+            const rootUrl = '';
+            const statusElement = document.getElementById('responseStatus');
+            const headersElement = document.getElementById('responseHeaders');
+            const logElement = document.getElementById('response-log');
 
-        const sendRequest = async (url, method, body = null, attempt = 0) => {
-            statusElement.textContent = `Sending ${method} request...`;
-            headersElement.textContent = '';
-            logElement.textContent = 'Loading...';
+            const sendRequest = async (url, method, body = null, attempt = 0) => {
+                statusElement.textContent = `Sending ${method} request...`;
+                headersElement.textContent = '';
+                logElement.textContent = 'Loading...';
 
-        const headers = {
-            'Content-Type': 'application/json',
-        };
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
 
-        try {
-            const fetchOptions = {
-                method,
-                headers,
-                body: body ? JSON.stringify(body) : undefined,
-            };
+                try {
+                    const fetchOptions = {
+                        method,
+                        headers,
+                        body: body ? JSON.stringify(body) : undefined,
+                    };
 
-            const response = await fetch(url, fetchOptions);
+                    const response = await fetch(url, fetchOptions);
 
-            const responseHeaders = {};
-            response.headers.forEach((value, key) => {
-                responseHeaders[key] = value;
-            });
-            headersElement.textContent = JSON.stringify(responseHeaders, null, 2);
+                    const responseHeaders = {};
+                    response.headers.forEach((value, key) => {
+                        responseHeaders[key] = value;
+                    });
+                    headersElement.textContent = JSON.stringify(responseHeaders, null, 2);
 
-            statusElement.textContent = `${response.status} ${response.statusText}`;
-            statusElement.style.color = (response.status >= 400) ? 'red' : 'green';
+                    statusElement.textContent = `${response.status} ${response.statusText}`;
+                    statusElement.style.color = (response.status >= 400) ? 'red' : 'green';
 
-            if (method === 'HEAD' || response.status === 204) {
-                logElement.textContent = '(Success, No content in body)';
-                return;
-            }
+                    if (method === 'HEAD' || response.status === 204) {
+                        logElement.textContent = '(Success, No content in body)';
+                        return;
+                    }
 
-            const bodyText = await response.text();
+                    const bodyText = await response.text();
 
-            try {
-                const json = JSON.parse(bodyText);
-                logElement.textContent = JSON.stringify(json, null, 2);
-            } catch (e) {
-                logElement.textContent = bodyText;
-            } 
+                    try {
+                        const json = JSON.parse(bodyText);
+                        logElement.textContent = JSON.stringify(json, null, 2);
+                    } catch (e) {
+                        logElement.textContent = bodyText;
+                    }
 
-        // Resource Refrences: https://www.geeksforgeeks.org/javascript/how-to-delay-a-loop-in-javascript-using-async-await-with-promise/,
-        // https://v-checha.medium.com/advanced-node-js-patterns-implementing-robust-retry-logic-656cf70f8ee9  
-        } catch (error) {
-            if (attempt < maxRetries) {
-                const delay = Math.pow(2, attempt) * 1000;
-                await new Promise(resolve => setTimeout(resolve, delay));
-                return sendRequest(url, method, body, attempt + 1);
-            }
+                    // Resource Refrences: https://www.geeksforgeeks.org/javascript/how-to-delay-a-loop-in-javascript-using-async-await-with-promise/,
+                    // https://v-checha.medium.com/advanced-node-js-patterns-implementing-robust-retry-logic-656cf70f8ee9  
+                } catch (error) {
+                    if (attempt < maxRetries) {
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return sendRequest(url, method, body, attempt + 1);
+                    }
 
-            statusElement.textContent = `Network Error: Failed after ${maxRetries} attempts.`;
-            statusElement.style.color = 'red';
-            logElement.textContent = `Error: ${error.message}`;
-          }
-        };
-
-        const maxRetries = 3;
-
-        const urlFieldElement = document.getElementById('urlField');
-        const methodSelectElement = document.getElementById('methodSelect');
-
-        document.getElementById('getForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const path = urlFieldElement.value;
-            const method = methodSelectElement.value;
-
-            sendRequest(`${rootUrl}${path}`, method);
-        });
-
-        document.getElementById('editForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const originalTitle = document.getElementById('editOriginalTitle').value.trim();
-            if (!originalTitle) {
-                statusElement.textContent = 'Error: Original Title is required to find the book.';
-                statusElement.style.color = 'red';
-                return;
-            }
-
-            const newTitle = document.getElementById('editNewTitle').value.trim();
-            const newAuthor = document.getElementById('editAuthor').value.trim();
-            const newYear = document.getElementById('editYear').value.trim();
-            const newGenres = document.getElementById('editGenres').value.trim();
-
-            const updateData = {};
-            if (newTitle) updateData.title = newTitle;
-            if (newAuthor) updateData.author = newAuthor;
-
-            if (newYear) {
-                const yearInt = parseInt(newYear, 10);
-                if (!isNaN(yearInt)) {
-                    updateData.year = yearInt;
+                    statusElement.textContent = `Network Error: Failed after ${maxRetries} attempts.`;
+                    statusElement.style.color = 'red';
+                    logElement.textContent = `Error: ${error.message}`;
                 }
-            }
-
-            if (newGenres) {
-                updateData.genres = newGenres.split(',').map(g => g.trim()).filter(g => g.length > 0);
-            }
-
-            if (Object.keys(updateData).length === 0) {
-                statusElement.textContent = 'Error: No new fields provided for update.';
-                statusElement.style.color = 'red';
-                return;
-            }
-
-            const encodedTitle = encodeURIComponent(originalTitle);
-            const url = `${rootUrl}/api/books/${encodedTitle}`;
-
-            sendRequest(url, 'POST', updateData);
-        });
-
-        document.getElementById('post').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const title = document.getElementById('postTitle').value;
-            const author = document.getElementById('postAuthor').value;
-            const genres = document.getElementById('postGenres').value.split(',').map(g => g.trim()).filter(g => g.length > 0);
-            const year = document.getElementById('postYear').value;
-
-            if (!title || !author || !genres.length || !year) {
-                statusElement.textContent = 'Error: Please fill out all required fields.';
-                statusElement.style.color = 'red';
-                return
-            }
-
-            const bookData = {
-                title,
-                author, 
-                genres,
-                year: parseInt(year, 10),
             };
 
-            sendRequest(`${rootUrl}/api/books`, 'POST', bookData);
-        });
-    };
+            const maxRetries = 3;
+
+            const urlFieldElement = document.getElementById('urlField');
+            const methodSelectElement = document.getElementById('methodSelect');
+
+            const queryAuthorElement = document.getElementById('queryAuthor');
+            const queryGenreElement = document.getElementById('queryGenre');
+            const queryLimitElement = document.getElementById('queryLimit');
+
+            //getting book
+            document.getElementById('getForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                let path = urlFieldElement.value;
+                const method = methodSelectElement.value;
+
+                const params = new URLSearchParams();
+
+                if (path.startsWith('/api/books') || path.startsWith('/api/books/')) {
+                    const author = queryAuthorElement.value.trim();
+                    const genre = queryGenreElement.value.trim();
+                    const limit = queryLimitElement.value.trim();
+
+                    if (author) params.append('author', author);
+                    if (genre) params.append('genre', genre);
+                    if (limit && !isNaN(parseInt(limit, 10))) params.append('limit', limit);
+                }
+
+                const queryString = params.toString();
+                if (queryString) {
+                    path = `${path}${path.includes('?') ? '&' : '?'}${queryString}`;
+                }
+
+                sendRequest(`${rootUrl}${path}`, method);
+            });
+
+            //editing book
+            document.getElementById('editForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const originalTitle = document.getElementById('editOriginalTitle').value.trim();
+                if (!originalTitle) {
+                    statusElement.textContent = 'Error: Original Title is required to find the book.';
+                    statusElement.style.color = 'red';
+                    return;
+                }
+
+                const newTitle = document.getElementById('editNewTitle').value.trim();
+                const newAuthor = document.getElementById('editAuthor').value.trim();
+                const newYear = document.getElementById('editYear').value.trim();
+                const newGenres = document.getElementById('editGenres').value.trim();
+
+                const updateData = {};
+                if (newTitle) updateData.title = newTitle;
+                if (newAuthor) updateData.author = newAuthor;
+
+                if (newYear) {
+                    const yearInt = parseInt(newYear, 10);
+                    if (!isNaN(yearInt)) {
+                        updateData.year = yearInt;
+                    }
+                }
+
+                if (newGenres) {
+                    updateData.genres = newGenres.split(',').map(g => g.trim()).filter(g => g.length > 0);
+                }
+
+                if (Object.keys(updateData).length === 0) {
+                    statusElement.textContent = 'Error: No new fields provided for update.';
+                    statusElement.style.color = 'red';
+                    return;
+                }
+
+                const encodedTitle = encodeURIComponent(originalTitle);
+                const url = `${rootUrl}/api/books/${encodedTitle}`;
+
+                sendRequest(url, 'POST', updateData);
+            });
+
+            //adding book
+            document.getElementById('post').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('postTitle').value;
+                const author = document.getElementById('postAuthor').value;
+                const genres = document.getElementById('postGenres').value.split(',').map(g => g.trim()).filter(g => g.length > 0);
+                const year = document.getElementById('postYear').value;
+
+                if (!title || !author || !genres.length || !year) {
+                    statusElement.textContent = 'Error: Please fill out all required fields.';
+                    statusElement.style.color = 'red';
+                    return
+                }
+
+                const bookData = {
+                    title,
+                    author,
+                    genres,
+                    year: parseInt(year, 10),
+                };
+
+                sendRequest(`${rootUrl}/api/books`, 'POST', bookData);
+            });
+        };
     </script>
 </head>
+
 <body>
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <a href="/documentation.html" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">View Documentation Here</a>
+    <div class="container is-fluid">
+        <div class="is-flex is-justify-content-space-between is-align-items-center py-4">
+            <a href="/documentation.html" class="button is-info is-medium">
+                View Documentation Here
+            </a>
         </div>
-        <h1>Book API</h1>
-        <section id="top">
-            <h3 style="margin-top: 0,">GET / HEAD Request</h3>
-            <form id="getForm">
-                <label for="urlField">Endpoint: </label>
-                <input id="urlField" type="text" name="urlField" list="endPoint" value="/api/books"/>
-                <datalist id="endPoint">
-                    <option value="/api/books">/api/books (All books)</option>
-                    <option value="/api/booksByTitle">/api/booksByTitle</option>
-                    <option value="/api/genres">/api/genres</option>
-                    <option value="/api/stats">/api/stats</option>
-                    <option value="/api/authors">/api/authors</option>
-                    <option value="/notReal">/notReal (404)</option>
-                </datalist>
+        <h1 class="title is-1">Book API</h1>
+        <div class="columns">
+            <div class="column is-half">
 
-                <label for="methodSelect">Method: </label>
-                <select id="methodSelect" name="methodSelect">
-                    <option value="GET">GET</option>
-                    <option value="HEAD">HEAD</option>
-                </select>
-                <input type="submit" value="Send Request" />
+                <section id="top" class="box">
+                    <h3 class="title is-4 has-text-primary">GET / HEAD Request</h3>
+                    <form id="getForm">
+                        <div class="control is-expanded">
+                            <label class="label" for="urlField">Endpoint: </label>
+                            <input class="input" id="urlField" type="text" name="urlField" list="endPoint"
+                                value="/api/books" />
+                            <datalist id="endPoint">
+                                <option value="/api/books">/api/books (All books)</option>
+                                <option value="/api/booksByTitle">/api/booksByTitle</option>
+                                <option value="/api/genres">/api/genres</option>
+                                <option value="/api/stats">/api/stats</option>
+                                <option value="/api/authors">/api/authors</option>
+                                <option value="/notReal">/notReal (404)</option>
+                            </datalist>
+                        </div>
+
+                        <div class="field-body is-flex mb-3">
+                            <div class="field is-narrow mr-3">
+                                <label class="label is-small" for="queryAuthor">Author:</label>
+                                <div class="control">
+                                    <input class="input is-small" id="queryAuthor" type="text" placeholder="tolkien">
+                                </div>
+                            </div>
+                            <div class="field is-narrow mr-3">
+                                <label class="label is-small" for="queryGenre">Genre:</label>
+                                <div class="control">
+                                    <input class="input is-small" id="queryGenre" type="text" placeholder="fiction">
+                                </div>
+                            </div>
+                            <div class="field is-narrow">
+                                <label class="labe is-small" for="queryLimit">Limit:</label>
+                                <div class="control">
+                                    <input class="input is-small" id="queryLimit" type="number" placeholder="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control">
+                            <label class="label" for="methodSelect">Method: </label>
+                            <div class="select">
+                                <select id="methodSelect" name="methodSelect">
+                                    <option value="GET">GET</option>
+                                    <option value="HEAD">HEAD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="contro is-align-items-end">
+                            <input type="submit" value="Send Request" class="button is-primary is-fullwidth" />
+                        </div>
+            </div>
             </form>
+            </section>
 
-            <h2>Edit Book</h2>
-            <form id="editForm">
-                <label for="editOriginalTitle">Original Title (to find book):</label>
-                <input type="text" id="editOriginalTitle" required><br>
+            <section class="box mt-4">
+                <h2 class="title is-4 has-text-info">Edit Book (POST)</h2>
+                <form id="editForm">
+                    <div class="field">
+                        <label class="label" for="editOriginalTitle">Original Title (to find book):</label>
+                        <div class="control">
+                            <input class="input" type="text" id="editOriginalTitle" required>
+                        </div>
+                    </div>
 
-                <label for="editNewTitle">New Title:</label>
-                <input type="text" id="editNewTitle"><br>
+                    <div class="field">
+                        <label class="label" for="editNewTitle">New Title:</label>
+                        <div class="control">
+                            <input class="input" type="text" id="editNewTitle">
+                        </div>
+                    </div>
 
-                <label for="editAuthor">New Author:</label>
-                <input type="text" id="editAuthor"><br>
+                    <div class="field">
+                        <label class="input" for="editAuthor">New Author:</label>
+                        <div class="control">
+                            <input class="input" type="text" id="editAuthor">
+                        </div>
+                    </div>
 
-                <label for="editYear">New Year:</label>
-                <input type="number" id="editYear"><br>
+                    <div class="field">
+                        <label class="label" for="editYear">New Year:</label>
+                        <div class="control">
+                            <input class="input" type="number" id="editYear">
+                        </div>
+                    </div>
 
-                <label for="editGenres">New Genres:</label>
-                <input type="text" id="editGenres"><br>
+                    <div class="field">
+                        <label class="label" for="editGenres">New Genres:</label>
+                        <div class="control">
+                            <input class="input" type="text" id="editGenres">
+                        </div>
+                    </div>
 
-                <input type="submit" value="Edit Book" />
-            </form>
+                    <div class="control">
+                        <input type="submit" value="Edit Book" class="button is-info is-fullwidth mt-4" />
+                    </div>
+                </form>
+            </section>
 
-            <h3 style="margin-top: 15px;">POST /api/books (Add Book)</h3>
-            <form id="post">
-                <label for="postTitle">Title: </label>
-                <input id="postTitle" type="text" name="Title" placeHolder="Title (Requried)" required />
+            <section class="box mt-4">
+                <h3 class="title is-4 has-text-success">POST /api/books (Add Book)</h3>
+                <form id="post">
+                    <div class="field">
+                        <label class="label" for="postTitle">Title: </label>
+                        <div class="control">
+                            <input class="input" id="postTitle" type="text" name="Title" placeHolder="Title (Requried)"
+                                required />
+                        </div>
+                    </div>
 
-                <label for="postAuthor">Author: </label>
-                <input id="postAuthor" type="text" name="author" placedHolder="Author (Required)" required />
+                    <div class="field">
+                        <label class="label" for="postAuthor">Author: </label>
+                        <div class="control">
+                            <input class="input" id="postAuthor" type="text" name="author"
+                                placeHolder="Author (Required)" required />
+                        </div>
+                    </div>
 
-                <label for="postGenres">Genres: </label>
-                <input id="postGenres" type="text" name="genres" placedHolder="Sci-Fi, Fiction (Required)" required />
+                    <div class="field">
+                        <label class="label" for="postGenres">Genres: </label>
+                        <div class="control">
+                            <input id="postGenres" type="text" name="genres" placeHolder="Sci-Fi, Fiction (Required)"
+                                required />
+                        </div>
+                    </div>
 
-                <label for="postYear">Year: </label>
-                <input id="postYear" type="number" name="year" placedHolder="Year (Required)" required min="1000" max="2025" step="1" />
+                    <div class="field">
+                        <label class="label" for="postYear">Year: </label>
+                        <div class="control">
+                            <input class="input" id="postYear" type="number" name="year" placeHolder="Year (Required)"
+                                required min="1000" max="2025" step="1" />
+                        </div>
+                    </div>
 
-                <input type="submit" value="Add Book" />
-            </form>
-        </section>
+                    <div class="control">
+                        <input type="submit" value="Add Book" class="button is-success is-fullwidth mt-4" />
+                    </div>
+                </form>
+            </section>
+        </div>
 
-        <section id="content">
-            <h3>API Response Details</h3>
-            <p>Status: <strong id="responseStatus">Awaiting request...</strong></p>
-            <p>Headers: </p>
-            <pre id="responseHeaders" style="font-size: 0.8em; color: #888;">(Headers appear here)</pre>
-            <p>Body: </p>
-            <pre id="response-log">(Body appears here)</pre>
-        </section>
+        <div class="column is=half">
+            <section id="content" class="box is-fullheight">
+                <h3 class="title is-4">API Response Details</h3>
+                <div class="content">
+                    <p class="is-size-5">Status: <strong id="responseStatus" class="has-text-info">Awaiting
+                            request...</strong></p>
+                    <p class="has-text-weight-bold mb-1">Headers: </p>
+                    <pre id="responseHeaders" class="has-background-light p-3 is-size-7"
+                        style="white-space: pre-wrap;">(Headers appear here)</pre>
+                    <p class="has-text-weight-bold mb-1">Body: </p>
+                    <pre id="response-log" class="has-background-black has-text-white p-3"
+                        style="min-height: 200px;">(Body appears here)</pre>
+                </div>
+            </section>
+        </div>
     </div>
-    
+    </div>
+
 </body>
+
 </html>

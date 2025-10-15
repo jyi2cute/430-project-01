@@ -4,32 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Documentation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <style>
-        body {font-family: sans-serif; line-height: 1.6; padding: 20px;}
-        h1 {color: #333; border-bottom: 2px solid #ccc; padding-bottom: 10px;}
-        h2 {color: #0056b3; margin-top: 25px; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
-        table {width: 100%; border-collapse: collapse; margin-bottom:20px;}
-        th, td {padding: 10px; text-align: left; border: 1px solid #ddd;}
-        th {background-color: #f4f4f4; color: #333}
-        .code {background-color:#eee; padding: 5px; border-radius: 4px; font-family: monospace;}
+        body {font-family: sans-serif;}
+           .code {
+            background: color #f5f5f5;
+            padding: 2px 4px; 
+            border-radius: 4px; 
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
         .method {font-weight: bold; color: #c0392b;}
         .get {color: #27ae60;}
         .post {color: #f39c12;}
+
+        .table th {
+            background-color: #f4f4f4;
+        }
     </style>
 </head>
 <body>
-    <h1>Book API Documentation</h2>
-    <p>This documentation page details the API endpoints (all endpoints that return JSON data, not static pages/files). 
-    Including the relative url, supported methods, applicable query params and body params(param name, type, required/
-    optional), the enpoint returns and its format, and examples of how-to-delay-a-loop-in-javascript-using-async-await-with-promise
+    <div class="container is-max-desktop py-5">
+    <h1 class="title is-1 has-text-centered has-text-info">Book API Documentation</h1>
+    <p class="content is-medium mb-5">This documentation page details the API endpoints (all endpoints that return JSON data, not static pages/files). 
+    Including the relative url, supported methods, applicable query params and body params(param name, type, required/optional), the enpoint returns and 
+    its format, and examples of usage.
     </p>
 
-    <h2>Retrieve All Books (and Filter)</h2>
-    <table>
-        <tr><th>Detail</th><th>Description</th></tr>
-        <tr><td><strong>Relative URL</strong></td><td><code class ="code">/api/books</code></td></tr>
-        <tr><td><strong>Supported Methods</strong></td><td><span class="get">GET</span>, <span class="method">HEAD</span><td></tr>
-        <tr><td colspan="2"><strong>Query Params</strong></td></tr>
+    <h2 class="title is-4 has-text-primary mt-6">Retrieve All Books (and Filter)</h2>
+    <table class="table is-fullwidth is-bordered">
+        <thead>
+        <tr><th>Detail</th><th colspan="2">Description</th></tr>
+        </thead>
+        <tbody>
+        <tr><td><strong>Relative URL</strong></td><td colspan="2"><code class ="code">/api/books</code></td></tr>
+        <tr>
+            <td><strong>Supported Methods</strong></td>
+            <td colspan="2">
+            <span class="get">GET</span>, 
+            <span class="method">HEAD</span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" class="has-text-weight-bold has-background-light">Query Params</td>
+        </tr>
         <tr>
             <th>Param Name</th><th>Type</th><th>Required/Optional</th>
         </tr>
@@ -37,62 +56,138 @@
         <tr><td><code class="code">author</code></td><td>string</td><td>Optional</td></tr>
         <tr><td><code class="code">genre</code></td><td>string</td><td>Optional</td></tr>
         <tr><td><code class="code">Limit</code></td><td>number</td><td>Optional</td></tr>
-        <tr><td><strong>Body Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td><strong>Returns</strong></td><td colspan="2">JSON object containing <code class="code">count</code> (number) and an array of <code class="code">books</code>.</td></tr>
-        <tr><td><strong>Usage Example</strong></td><td colspan="2"><code class="code get">GET /api/books?author=tolkien&limit=5</code></td></tr>
+        <tr><td colspan="3" class="has-text-weight-bold"><strong>Body Params</strong>: None</td></tr>
+        <tr>
+            <td colspan="3">
+            <strong class="has-text-weight-semibold">Returns</strong>: JSON object containing <code class="code">count</code> (number) and an array of <code class="code">books</code>.
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+            <strong class="has-text-weight-semibold">Usage Example</strong>: <code class="code get">GET /api/books?author=tolkien&limit=5</code>
+            </td>
+        </tr>
+        </tbody>
     </table>
 
-    <h2>Retrieve Book by Title</h2>
-    <table>
+    <h2 class="title is-4 has-text-primary mt-6">Retrieve Book by Title</h2>
+    <table class="table is-fullwidth is-bordered">
+        <thead>
         <tr><th>Detail</th><th>Description</th></tr>
+        </thead>
+        <tbody>
         <tr><td><strong>Realtive URL</strong></td><td><code class="code">/api/books/:title</code> (where <code class="code">:title</code> is the URL-encoded book title)</td></tr>
         <tr><td><strong>Supported Methods</strong></td><td><span class="get">GET</span>, <span class="method">HEAD</span></td></tr>
-        <tr><td><strong>Query Params</strong></td><td colspan="2">NONE</td></tr>
-        <tr><td><strong>Body Params</strong></td><td colspan="2">NONE</td></tr>
-        <tr><td><strong>Returns</strong></td><td colspan="2">JSON object containing the full book data is found (200), or a JSON error message if not found (404).</td></tr>
-        <tr><td><strong>Usage Example</strong></td><td colspan="2"><code class="code get">GET /api/books/The%20Hobbit</code></td></tr>
+        <tr><td><strong>Query Params</strong></td><td>NONE</td></tr>
+        <tr><td><strong>Body Params</strong></td><td>NONE</td></tr>
+        <tr><td><strong>Returns</strong></td><td>JSON object containing the full book data is found (200), or a JSON error message if not found (404).</td></tr>
+        <tr><td><strong>Usage Example</strong></td><td><code class="code get">GET /api/books/The%20Hobbit</code></td></tr>
+        </tbody>
     </table>
         
-    <h2> Retrieve Genres</h2>
-    <table>
+    <h2 class="title is-4 has-text-primary mt-6"> Retrieve Genres</h2>
+    <table class="table is-fullwidth is-bordered">
+        <thead>
         <tr><th>Detail</th><th>Description</th></tr>
+        </thead>
+        <tbody>
         <tr><td><strong>Realtive URL</strong></td><td><code class="code">/api/genres</code></td></tr>
         <tr><td><strong>Supported Methods</strong></td><td><span class="get">GET</span>, <span class="method">HEAD</span></td></tr>
-        <tr><td><strong>Query Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td><strong>Body Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td><strong>Returns</strong></td><td colspan="2">JSON object containing a <code class="code">genres</code> array of unique genre strings.</td></tr>
-        <tr><td><strong>Usage Example</strong></td><td colspan="2"><code class="code get">GET /api/genres</code></td></tr>
+        <tr><td><strong>Query Params</strong></td><td>None</td></tr>
+        <tr><td><strong>Body Params</strong></td><td>None</td></tr>
+        <tr><td><strong>Returns</strong></td><td>JSON object containing a <code class="code">genres</code> array of unique genre strings.</td></tr>
+        <tr><td><strong>Usage Example</strong></td><td><code class="code get">GET /api/genres</code></td></tr>
+        </tbody>
     </table>
 
-    <h2>Retrieve Authors</h2>
-    <table>
+    <h2 class="title is-4 has-text-primary mt-6">Retrieve Authors</h2>
+    <table class="table is-fullwidth is-bordered">
+        <thead>
         <tr><th>Detail</th><th>Description</th></tr>
+        </thead>
+        <tbody>
         <tr><td><strong>Realtive URL</strong></td><td><code class="code">/api/authors</code></td></tr>
         <tr><td><strong>Supported Methods</strong></td><td><span class="get">GET</span>, <span class="method">HEAD</span></td></tr>
-        <tr><td><strong>Query Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td><strong>Body Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td><strong>Returns</strong></td><td colspan="2">JSON object containing a <code class="code">authors</code> array of unique author strings.</td></tr>
-        <tr><td><strong>Usage Example</strong></td><td colspan="2"><code class="code get">GET /api/authors</code></td></tr>
+        <tr><td><strong>Query Params</strong></td><td>None</td></tr>
+        <tr><td><strong>Body Params</strong></td><td>None</td></tr>
+        <tr><td><strong>Returns</strong></td><td>JSON object containing a <code class="code">authors</code> array of unique author strings.</td></tr>
+        <tr><td><strong>Usage Example</strong></td><td><code class="code get">GET /api/authors</code></td></tr>
+        </tbody>
     </table>
 
-    <h2>Retrieve Data Statistics</h2>
-    <table>
+    <h2 class="title is-4 has-text-primary mt-6">Retrieve Data Statistics</h2>
+    <table class="table is-fullwidth is-bordered">
+        <thead>
         <tr><th>Detail</th><th>Description</th></tr>
+        </thead>
+        <tbody>
         <tr><td><strong>Realtive URL</strong></td><td><code class="code">/api/stats</code></td></tr>
         <tr><td><strong>Supported Methods</strong></td><td><span class="get">GET</span>, <span class="method">HEAD</span></td></tr>
-        <tr><td><strong>Query Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td><strong>Body Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td><strong>Returns</strong></td><td colspan="2">JSON object containing data statstics (<code class="code">totalBooks</code>, <code class="code">totalAuthors</code>, <code class="code">lastUpdated</code>).</td></tr>
-        <tr><td><strong>Usage Example</strong></td><td colspan="2"><code class="code get">GET /api/stats</code></td></tr>
+        <tr><td><strong>Query Params</strong></td><td>None</td></tr>
+        <tr><td><strong>Body Params</strong></td><td>None</td></tr>
+        <tr><td><strong>Returns</strong></td><td>JSON object containing data statstics (<code class="code">totalBooks</code>, <code class="code">totalAuthors</code>, <code class="code">lastUpdated</code>).</td></tr>
+        <tr><td><strong>Usage Example</strong></td><td><code class="code get">GET /api/stats</code></td></tr>
+        </tbody>
     </table>
 
-    <h2>Edit Existing Book</h2>
-    <table>
-        <tr><th>Detail</th><th>Description</th></tr>
-        <tr><td><strong>Realtive URL</strong></td><td><code class="code">/api/books/:title</code> (where <code class="code">:title</code> is the URL-encoded of original book title)</td></tr>
-        <tr><td><strong>Supported Methods</strong></td><td><span class="post">POST</span></td></tr>
-        <tr><td><strong>Query Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td colspan="3"><strong>Body Params (Content-Type: application/json)</strong><br><em>Node: Any field provided is optional, but at least one must be provided for an update to occur.</em></td></tr>
+    <h2 class="title is-4 has-text-danger mt-6">Edit Existing Book</h2>
+    <table class="table is-fullwidth is-bordered">
+        <thead>
+        <tr><th>Detail</th><th colspan="2">Description</th></tr>
+        </thead>
+        <tbody>
+        <tr><td><strong>Realtive URL</strong></td>
+            <td colspan="2"><code class="code">/api/books/:title</code> (where <code class="code">:title</code> is the URL-encoded of original book title)</td>
+        </tr>
+        <tr>
+            <td><strong>Supported Methods</strong></td>
+            <td colspan="2"><span class="post">POST</span></td>
+        </tr>
+        <tr>
+            <td><strong>Query Params</strong></td>
+            <td colspan="2">None</td> 
+        </tr>
+        <tr>
+            <td colspan="3" class="has-background-light">
+                <strong class="has-text-weight-bold">Body Params (Content-Type: application/json)</strong><br>
+                <em class="is-size-7">Node: Any field provided is optional, but at least one must be provided for an update to occur.</em>
+            </td>
+        </tr>
+        <tr>
+            <th>Param Name</th>
+            <th>Type</th>
+            <th>Required/Optional</th>
+        </tr>
+        <tr><td><code class="code">title</code></td><td>string</td><td>Optional</td></tr>
+        <tr><td><code class="code">author</code></td><td>string</td><td>Optional</td></tr>
+        <tr><td><code class="code">genres</code></td><td>string</td><td>Optional</td></tr>
+        <tr><td><code class="code">year</code></td><td>string</td><td>Optional</td></tr>
+        <tr><td class="has-text-weight-semibold"><strong>Returns</strong></td><td colspan="2"><strong>200 OK</strong> on success. Returns a JSON message and the updated book object. Returns <strong>404 Not Found</strong> if the book can't be located.</td></tr>
+        <tr><td class="has-text-weight-semibold"><strong>Usage Example</strong></td><td colspan="2"><code class="code post">POST /api/books/The%20Hobbit</code> with JSON body: <code class="code">{"title": "The Hobbit", "author": "J.R.R. Tolkien"}</code></td></tr>
+        </tbody>
+    </table>
+
+    <h2 class="title is-4 has-text-danger mt-6">Add Book</h2>
+    <table class="table is-fullwidth is-bordered">
+        <thead>
+        <tr><th>Detail</th><th colspan="2">Description</th></tr>
+        </thead>
+        <tbody>
+         <tr>
+            <td><strong>Realtive URL</strong></td>
+            <td colspan="2"><code class="code">/api/books</code></td>
+        </tr>
+        <tr>
+            <td><strong>Supported Methods</strong></td>
+            <td colspan="2"><span class="post">POST</span></td>
+        </tr>
+        <tr>
+            <td><strong>Query Params</strong></td>
+            <td colspan="2">None</td>
+        </tr>
+        <tr>
+            <td colspan="3" class="has-text-weight-bold has-background-light"><strong>Body Params (Content-Type: application/json)</strong></td>
+        </tr>
         <tr>
             <th>Param Name</th><th>Type</th><th>Required/Optional</th>
         </tr>
@@ -100,28 +195,10 @@
         <tr><td><code class="code">author</code></td><td>string</td><td>Optional</td></tr>
         <tr><td><code class="code">genres</code></td><td>string</td><td>Optional</td></tr>
         <tr><td><code class="code">year</code></td><td>string</td><td>Optional</td></tr>
-        <tr><td><strong>Returns</strong></td><td colspan="2"><strong>200 OK</strong> on success. Returns a JSON message and the updated book object. Returns <strong>404 Not Found</strong> if the book can't be located.</td></tr>
-        <tr><td><strong>Usage Example</strong></td><td colspan="2"><code class="code post">POST /api/books/The%20Hobbit</code> with JSON body: <code class="code">{"title": "The Hobbit, or There and Back Again", "author": "J.R.R. Tolkien"}</code></td></tr>
+        <tr><td class="has-text-weight-semibold"><strong>Returns</strong></td><td colspan="2"><strong>201 Created</strong> on success, or <strong>400 Bad Request</strong> if missing fields, or <strong>409 Conflict</strong> if book arleady exists. Returns a JSON message and the new book object.</td></tr>
+        <tr><td class="has-text-weight-semibold"><strong>Usage Example</strong></td><td colspan="2"><code class="code post">POST /api/books</code> with JSON body: <code class="code">{"title": "The Lord of the Rings", "author": "J.R.R. Tolkien", "genres": ["Fantasy"], "year": 1954}</code></td></tr>
+        </tbody>
     </table>
-
-    <h2>Add Book</h2>
-    <table>
-        <tr><th>Detail</th><th>Description</th></tr>
-         <tr><td><strong>Realtive URL</strong></td><td><code class="code">/api/books</code></td></tr>
-        <tr><td><strong>Supported Methods</strong></td><td><span class="post">POST</span></td></tr>
-        <tr><td><strong>Query Params</strong></td><td colspan="2">None</td></tr>
-        <tr><td colspan="3"><strong>Body Params (Content-Type: application/json)</strong></td></tr>
-        <tr>
-            <th>Param Name</th><th>Type</th><th>Required/Optional</th>
-        </tr>
-        <tr><td><code class="code">title</code></td><td>string</td><td>Optional</td></tr>
-        <tr><td><code class="code">author</code></td><td>string</td><td>Optional</td></tr>
-        <tr><td><code class="code">genres</code></td><td>string</td><td>Optional</td></tr>
-        <tr><td><code class="code">year</code></td><td>string</td><td>Optional</td></tr>
-        <tr><td><strong>Returns</strong></td><td colspan="2"><strong>201 Created</strong> on success, or <strong>400 Bad Request</strong> if missing fields, or <strong>409 Conflict</strong> if book arleady exists. Returns a JSON message and the new book object.</td></tr>
-        <tr><td><strong>Usage Example</strong></td><td colspan="2"><code class="code post">POST /api/books</code> with JSON body: <code class="code">{"title": "The Lord of the Rings", "author": "J.R.R. Tolkien", "genres": ["Fantasy"], "year": 1954}</code></td></tr>
-    </table>
-
-    </table>
+   </div>
 </body>
 </html>
