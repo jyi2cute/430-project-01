@@ -204,7 +204,7 @@ const addBook = (request, response) => {
   const newBook = {
     title: body.title,
     author: body.author,
-    year,
+    year: year,
     genres: bookGenres,
   };
 
